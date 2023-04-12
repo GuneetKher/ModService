@@ -28,7 +28,7 @@ namespace ModService.Services
         {
             var httpClient = new HttpClient();
             // var content = new StringContent(JsonConvert.SerializeObject(), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"flag/{post.Id}/{id}", null);
+            var response = await _httpClient.PostAsync($"Post/flag/{post.Id}/{id}", null);
             if (!response.IsSuccessStatusCode)
             {
                 return Results.Problem("Flagging failed");
@@ -40,7 +40,7 @@ namespace ModService.Services
         public async Task<List<Post>> GetAllPostsAsync()
         {
             var posts = await _posts.Find(p => true).ToListAsync();
-            return posts;
+            return posts.OrderBy(p => p.IsMod).ToList();
         }
 
         public async Task<Post> GetPostByIdAsync(string id)
@@ -54,7 +54,7 @@ namespace ModService.Services
 
             var httpClient = new HttpClient();
             // var content = new StringContent(JsonConvert.SerializeObject(), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{id}/ismod", null);
+            var response = await _httpClient.PutAsync($"Post/{id}/ismod", null);
             if (!response.IsSuccessStatusCode)
             {
                 return false;

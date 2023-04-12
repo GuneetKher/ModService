@@ -9,7 +9,7 @@ using ModService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5239";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5278";
 var url = $"http://0.0.0.0:{port}";
 // Add services to the container.
 
@@ -32,7 +32,7 @@ if (builder.Environment.IsProduction())
     builder.Services.Configure<ServiceAddresses>(builder.Configuration.GetSection("prod-addresses"));
 }
 else{
-builder.Services.Configure<ServiceAddresses>(builder.Configuration.GetSection("addresses"));
+    builder.Services.Configure<ServiceAddresses>(builder.Configuration.GetSection("dev-addresses"));
 }
 
 // Configure JWT authentication
@@ -53,7 +53,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+    });
 
 var app = builder.Build();
 
@@ -65,9 +73,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.Run(url);
